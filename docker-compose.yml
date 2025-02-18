@@ -1,0 +1,19 @@
+version: "3.8"
+services:
+  node-server:
+    build: ./NTU-FYP-Chatbot-backend # Build from the root of Node app, not dist
+    ports:
+      - "443:3000" # Exposing HTTPS Node.js server
+    depends_on:
+      - python-server
+    volumes:
+      - ./node-certs:/app/certs # Mount Node.js certs
+    command: ["node", "dist/server.js"] # Entry point for Node.js
+
+  python-server:
+    build: ./NTU-FYP-Chatbot-AI # Build from the root of Python app
+    ports:
+      - "3001:3001" # Exposing HTTPS Flask server
+    volumes:
+      - ./python-certs:/app/certs # Mount Flask certs
+    command: ["python", "app.py"] # Entry point for Python Flask server
