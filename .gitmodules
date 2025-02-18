@@ -1,0 +1,9 @@
+[submodule "NTU-FYP-Chatbot-frontend"]
+	path = NTU-FYP-Chatbot-frontend
+	url = https://github.com/bryanluwz/NTU-FYP-Chatbot-frontend.git
+[submodule "NTU-FYP-Chatbot-backend"]
+	path = NTU-FYP-Chatbot-backend
+	url = https://github.com/bryanluwz/NTU-FYP-Chatbot-backend.git
+[submodule "NTU-FYP-Chatbot-AI"]
+	path = NTU-FYP-Chatbot-AI
+	url = https://github.com/bryanluwz/NTU-FYP-Chatbot-AI.git
