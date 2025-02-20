@@ -1,21 +1,49 @@
 version: "3.8"
+
 services:
   node-server:
-    build: ./NTU-FYP-Chatbot-backend # Build from the root of Node app, not dist
+    image: ntu-fyp-chatbot_node-server
     ports:
-      - "3000:3000" # Exposing HTTPS Node.js server
+      - "3000:3000"
+    environment:
+      - AI_HOST=python-server
+      - AI_PORT=3001
+      - JWT_SECRET_FILE=/run/secrets/jwt_secret
+    secrets:
+      - jwt_secret
     depends_on:
       - python-server
     volumes:
-      - ./NTU-FYP-Chatbot-frontend/dist:/app/fe-dist # Mount frontend dist from frontend repo
-      - ./node-certs:/app/certs # Mount Node.js certs
-      - ./NTU-FYP-Chatbot-backend/database:/database.db
-    command: ["node", "dist/server.js"] # Entry point for Node.js
+      - ./NTU-FYP-Chatbot-frontend/dist:/app/fe-dist
+      - ./node-certs:/app/certs
+      - ./NTU-FYP-Chatbot-backend/database:/app/database
+    command: ["node", "dist/server.js"]
+    networks:
+      - chatbot-network # ✅ Attach to overlay network
 
   python-server:
-    build: ./NTU-FYP-Chatbot-AI # Build from the root of Python app
+    image: ntu-fyp-chatbot_python-server
     ports:
-      - "3001:3001" # Exposing HTTPS Flask server
+      - "3001:3001"
+    environment:
+      - HF_TOKEN_FILE=/run/secrets/hf_token
+      - LLM_MODEL=meta-llama/Llama-3.2-1B-Instruct # ✅ Set the model to use here
+    secrets:
+      - hf_token
     volumes:
-      - ./python-certs:/app/certs # Mount Flask certs
-    command: ["python3", "app.py"] # Entry point for Python Flask server
+      - ./python-certs:/app/certs
+      - ./NTU-FYP-Chatbot-AI/documents:/app/documents
+      - ./NTU-FYP-Chatbot-AI/models:/app/models
+    command: ["python3", "app.py", "--port=3001"]
+    networks:
+      - chatbot-network # ✅ Attach to overlay network
+
+secrets:
+  hf_token:
+    file: ./secrets/hf_token.txt
+  jwt_secret:
+    file: ./secrets/jwt_secret.txt
+
+networks:
+  chatbot-network:
+    driver: overlay # Netowkr nwetokw neworkt netowerk netoewrk netowrk you get what i mean
