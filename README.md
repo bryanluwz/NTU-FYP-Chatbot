@@ -146,4 +146,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgements
 
-1. [ME](https://github.com/bryanluwz) for building this awesome chatbot frontend, alone, with no help from humans. 🤖
+I would like to thank the following:
+
+1. [ME](https://github.com/bryanluwz) for building this awesome chatbot, alone...
+2. [ChatGPT](https://chat.open.ai/) for providing me sanity (and assistance) during this project.
+3. [Github Copilot](https://copilot.github.com/) for sort of helping me during this project.
+4. [Sheer Willpower](https://www.youtube.com/watch?v=ZXsQAXx_ao0) for keeping me alive during this project, knowing that what I'm doing is probably not worth it.
+5. The Universe for giving me the opportunity to do this project, which I probably won't do again, but hey, at least I did it once, right? (not like it's what i wanted in the first place, and might even be irrelevant in the future, but hey, at least I did something right? for the sake of whomever it may concern, if it even concerns anyone at all, which it probably doesn't, but hey, at least I tried)
+6. Definitely not my supervising professor, for forgetting that I exist, not providing assistance, providing terrible advice, and not even knowing what I'm doing. But, at least this will get me out of this hellscape faster right?
