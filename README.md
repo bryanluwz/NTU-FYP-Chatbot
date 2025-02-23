@@ -106,7 +106,7 @@ Of course you gotta have a GPU to run this, and you need to have the necessary d
 
 #### Docker Desktop (Windows)
 
-When you download Docker Desktop, WSL2 is automatically installed. You can check if you have WSL2 by running `wsl -l -v`. If you see `docker-desktop-data` and `docker-desktop` in the list, then you have WSL2 installed. See [WSL2 / Linux](#wsl2--linux) for further instructions.
+When you download Docker Desktop, WSL2 is automatically installed (or maybe need specified idk). You can check if you have WSL2 by running `wsl -l -v`. If you see `docker-desktop-data` and `docker-desktop` in the list, then you have WSL2 installed. See [WSL2 / Linux](#wsl2--linux) for further instructions.
 
 If WSL2 is not installed, then you can follow the following instructions:
 
@@ -180,6 +180,12 @@ Then in the WSL / Linux terminal, you can run the following:
    docker rmi $(docker images -q -a)
    ```
 
+7. If everything is working, you need to setup GPU for docker configuration by running:
+
+   ```bash
+   sudo ./gpu-setup.sh
+   ```
+
 ### Building and Running the Docker Containers
 
 Note that you have to use the same docker context as the one you used to test the GPU support. If you are using WSL2, then you should be using the WSL2 context. If you are using Docker Desktop terminal (meaning NO GPU), then you should be using the Docker Desktop context.
@@ -236,9 +242,11 @@ Build the images by running the following command:
 
 **Another Note:** This would also take up a lot of space, so make sure you have enough space to build the images.
 
-**Yet Another Note:** The database or whatever files / folders will be stored in a docker volume, so whatever information you have in those files / folders would also be stored in the docker volume. So if you want to keep the data private, DELETE THEM BEFORE BUILDING THE IMAGES.
+**Yet Another Note:** The database or whatever files / folders will be stored in a docker volume, so whatever information you have in those files / folders might also (actually idk, i might fix that alr) be stored in the docker volume. So if you want to keep the data private, DELETE THEM BEFORE BUILDING THE IMAGES.
 
 **Ok Final Note I Promise:** If you do not have `buildx` enabled, then you can build the images separately by just omiting the `buildx` keyword.
+
+**Ok I lied, one more note:** You will be running a few shell files on WSL2/Linux, but I'm not sure whether they're necessary or not, because those are the vestigial remains of my attempts to get the GPU support working. _Wish me good health_
 
 ```bash
 docker buildx build -t ntu-fyp-chatbot_node-server ./NTU-FYP-Chatbot-backend
@@ -250,6 +258,7 @@ Then deploy the stack by running the following command:
 With GPU:
 
 ```bash
+./gpu-pre-deploy.sh # This is to setup the GPU node
 docker stack deploy -c docker-compose-gpu.yml ntu-fyp-chatbot
 ```
 
@@ -274,7 +283,7 @@ docker service logs ntu-fyp-chatbot_node-server
 docker service logs ntu-fyp-chatbot_python-server
 ```
 
-For real time
+For real time loggies,
 
 ```bash
 docker service logs -f ntu-fyp-chatbot_node-server
@@ -334,6 +343,11 @@ docker stack rm ntu-fyp-chatbot
 2. Why only slow the first time running?
 
    - Because I'm slow to initialise, and I only initialise each sub components when needed ok? 🐢
+
+3. Docker not found, Daemon not running, etc.
+
+   - Did you run Docker Desktop before shutting it down? No? Good, then you're good to go.
+     Yes? Then run `wsl --shutdown` in a non-WSL terminal in Windows.
 
 ## License
 

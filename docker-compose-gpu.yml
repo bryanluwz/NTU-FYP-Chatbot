@@ -33,7 +33,7 @@ services:
     environment:
       - HF_TOKEN_FILE=/run/secrets/hf_token
       - LLM_MODEL=meta-llama/Llama-3.2-1B-Instruct # Set the model to use here
-      - DEBUG=true # Enable debug mode for python server (why not working lol)
+      - NVIDIA_VISIBLE_DEVICES=all # BRUH it takes just this one line to fix the stupid GPU, 4 HOURS OF WORK JUST FOR THIS
     secrets:
       - hf_token
     volumes:
@@ -42,12 +42,16 @@ services:
       - ./NTU-FYP-Chatbot-AI/models:/app/models
     command: ["python3", "app.py", "--debug"]
     deploy:
+      replicas: 1
       resources:
         reservations:
           generic_resources:
             - discrete_resource_spec:
                 kind: "NVIDIA-GPU"
                 value: 1
+      placement:
+        constraints:
+          - node.labels.gpu == true
     networks:
       - chatbot-network #  Attach to overlay network
 
