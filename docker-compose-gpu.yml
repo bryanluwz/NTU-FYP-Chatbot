@@ -1,0 +1,58 @@
+version: "3.8"
+
+networks:
+  chatbot-network:
+    driver: overlay # Netowkr nwetokw neworkt netowerk netoewrk netowrk you get what i mean
+
+services:
+  node-server:
+    image: ntu-fyp-chatbot_node-server
+    ports:
+      - "3000:3000"
+    environment:
+      - AI_HOST=python-server
+      - AI_PORT=3001
+      - JWT_SECRET_FILE=/run/secrets/jwt_secret
+    secrets:
+      - jwt_secret
+    depends_on:
+      - python-server
+    volumes:
+      - ./NTU-FYP-Chatbot-frontend/dist:/app/fe-dist
+      - ./node-certs:/app/certs
+      - ./NTU-FYP-Chatbot-backend/database:/app/database
+    command: ["node", "dist/server.js"]
+    networks:
+      - chatbot-network # Attach to overlay network
+
+  python-server:
+    image: ntu-fyp-chatbot_python-server
+    # Remove this deploy section if you are not using GPU (or GPU not found)
+    ports:
+      - "3001:3001"
+    environment:
+      - HF_TOKEN_FILE=/run/secrets/hf_token
+      - LLM_MODEL=meta-llama/Llama-3.2-1B-Instruct # Set the model to use here
+      - DEBUG=true # Enable debug mode for python server (why not working lol)
+    secrets:
+      - hf_token
+    volumes:
+      - ./python-certs:/app/certs
+      - ./NTU-FYP-Chatbot-AI/documents:/app/documents
+      - ./NTU-FYP-Chatbot-AI/models:/app/models
+    command: ["python3", "app.py", "--debug"]
+    deploy:
+      resources:
+        reservations:
+          generic_resources:
+            - discrete_resource_spec:
+                kind: "NVIDIA-GPU"
+                value: 1
+    networks:
+      - chatbot-network #  Attach to overlay network
+
+secrets:
+  hf_token:
+    file: ./secrets/hf_token.txt
+  jwt_secret:
+    file: ./secrets/jwt_secret.txt

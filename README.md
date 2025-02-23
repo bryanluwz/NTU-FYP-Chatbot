@@ -2,13 +2,41 @@
 
 Main folder for NTU FYP Chatbot Project
 
-Please see each submodules README.md for more information.
+Please see each submodules README.md for more information, or not up to you...
 
 1. [Node Server](./NTU-FYP-Chatbot-backend/README.md)
 2. [Python Server](./NTU-FYP-Chatbot-AI/README.md)
 3. [Frontend](./NTU-FYP-Chatbot-frontend/README.md)
 
-## Setup and Installation
+## Table of Contents
+
+- [NTU-FYP-Chatbot](#ntu-fyp-chatbot)
+  - [Table of Contents](#table-of-contents)
+  - [Download and Installation](#download-and-installation)
+    - [Clone the repository (including submodules)](#clone-the-repository-including-submodules)
+    - [Pull the latest changes](#pull-the-latest-changes)
+  - [Running the Project with `node` and `python`](#running-the-project-with-node-and-python)
+  - [Running the Project with `Docker`](#running-the-project-with-docker)
+    - [For GPU Support](#for-gpu-support)
+      - [Docker Desktop (Windows)](#docker-desktop-windows)
+      - [WSL2 / Linux](#wsl2--linux)
+    - [Building and Running the Docker Containers](#building-and-running-the-docker-containers)
+      - [Init swarm](#init-swarm)
+      - [Deploy the stack](#deploy-the-stack)
+      - [Check the services (optional)](#check-the-services-optional)
+      - [See the logs (optional)](#see-the-logs-optional)
+      - [Access the services](#access-the-services)
+      - [Remove the stack](#remove-the-stack)
+  - [Extra Information](#extra-information)
+    - [GPU Support on Docker](#gpu-support-on-docker)
+    - [Environment Variables](#environment-variables)
+    - [Node Server](#node-server)
+    - [Python Server](#python-server)
+  - [FAQs](#faqs)
+  - [License](#license)
+  - [Acknowledgements](#acknowledgements)
+
+## Download and Installation
 
 ### Clone the repository (including submodules)
 
@@ -38,14 +66,17 @@ git submodule foreach 'git pull origin main'
 
 _Recommended if you have `node` and `python` installed_
 
-Please refer to the README.md in the respective folders for more information.
+Please refer to the README.md in the respective folders for more information. You should skip the cloning part in each `README.md` instructions as you have already cloned the repository, just ensure that you have the latest changes, and you are running the commands in the right directory. This could be achieved by running `cd <submodule_name>` before running the commands, and you will see the correct path in the terminal.
 
-[Node Server](./NTU-FYP-Chatbot-backend/README.md#setup-and-installation)
-[Python Server](./NTU-FYP-Chatbot-AI/README.md#setup-and-installation)
+1. [Node Server](./NTU-FYP-Chatbot-backend/README.md#setup-and-installation)
 
-## Running the Project with Docker
+2. [Python Server](./NTU-FYP-Chatbot-AI/README.md#setup-and-installation)
+
+## Running the Project with `Docker`
 
 _Recommended if you don't have `node` and `python`_
+
+**NOTE: You can use `Docker Desktop` or `docker on WSL2` to run the project. Most of the procedures are similar, but there are some differences in the GPU support section. Do not change `docker` styles throuhg setup process**
 
 Similar to using `node` and `python`, you can run the project using Docker. But you would have to create a folder called `secrets` with two `txt` files,
 
@@ -67,23 +98,168 @@ NTU-FYP-Chatbot
 └── README.md
 ```
 
-### Init swarm
+You do not have to do anything else with the other stuff, just make sure you have the `secrets` folder with the two `.txt` files.
+
+### For GPU Support
+
+Of course you gotta have a GPU to run this, and you need to have the necessary drivers installed. You can check if you have the necessary drivers by running `nvidia-smi` in the terminal. If you see the GPU information, then you are good to go. If not, then you need to install the necessary drivers. How? I don't know, google it.
+
+#### Docker Desktop (Windows)
+
+When you download Docker Desktop, WSL2 is automatically installed. You can check if you have WSL2 by running `wsl -l -v`. If you see `docker-desktop-data` and `docker-desktop` in the list, then you have WSL2 installed. See [WSL2 / Linux](#wsl2--linux) for further instructions.
+
+If WSL2 is not installed, then you can follow the following instructions:
+
+1. [yes](https://www.google.com/search?q=how+to+install+wsl+with+docker&oq=how+to+install+wsl+with+docker)
+
+#### WSL2 / Linux
+
+_If you are on any Linux distribution, you can follow this guide. Might as well not use the `Docker Desktop` method right?_
+
+Make sure that the docker running is not the Docker Desktop, but the Docker running in WSL2. You can check this by running `docker info` and checking the `Operating System` field. If it is `Docker Desktop`, then you are running the Docker Desktop version, and you should switch to the WSL2 version. You must terminate the `Docker Desktop` app before running the WSL2 terminal.
+
+Alternatively, you can run the following command to switch to the WSL2 version:
+
+```bash
+docker context ls
+docker context use default
+```
+
+Then in the WSL / Linux terminal, you can run the following:
+
+1. Check if you have `docker compose` installed by running `docker-compose --version`. If not, install it by:
+
+   ```bash
+   DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+   mkdir -p $DOCKER_CONFIG/cli-plugins
+   curl -SL https://github.com/docker/compose/releases/download/v2.12.2/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
+
+   chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+   # Test the installation
+   docker compose version
+   ```
+
+2. Install NVIDIA Container Toolkit (if not installed yet) by:
+
+   ```bash
+   distribution=$(. /etc/os-release;echo $ID$VERSION_ID) && \
+   curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add - && \
+   curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list && \
+   sudo apt update && sudo apt install -y nvidia-container-toolkit
+   ```
+
+3. Restart Docker by:
+
+   ```bash
+   sudo systemctl restart docker
+   ```
+
+   or just restart the ~~computer~~ WSL terminal, by running `wsl --shutdown` in a non-WSL terminal in Windows, make sure right docker context.
+
+4. Check if the NVIDIA Container Toolkit is installed by running
+
+   ```bash
+   docker run --rm --gpus all nvidia/cuda:12.3.1-base-ubuntu20.04 nvidia-smi
+   ```
+
+5. Test further using the `docker-compose-test.yml` file:
+
+   This might take some time to download
+
+   ```bash
+   docker compose -f docker-compose-test.yml up
+   ```
+
+   This should print GPU device name.
+
+6. Remove all containers and images by running: (optional, as this will remove everything that was installed)
+
+   ```bash
+   docker compose -f docker-compose-test.yml down
+   docker system prune -a
+   docker rmi $(docker images -q -a)
+   ```
+
+### Building and Running the Docker Containers
+
+Note that you have to use the same docker context as the one you used to test the GPU support. If you are using WSL2, then you should be using the WSL2 context. If you are using Docker Desktop terminal (meaning NO GPU), then you should be using the Docker Desktop context.
+
+#### Ensuring `buildx` is enabled
+
+You can check if `buildx` is enabled by running the following command:
+
+```bash
+docker buildx version
+```
+
+If it is not enabled, you can enable it by running the following command:
+
+```bash
+docker plugin install docker/docker-buildx
+```
+
+#### Init swarm
 
 ```bash
 docker swarm init
 ```
 
-### Deploy the stack
+If there is an error of multiple IP addresses,
+
+For example:
 
 ```bash
-# Build the images (will take forever so prepare some popcorn)
-docker build -t ntu-fyp-chatbot_node-server ./NTU-FYP-Chatbot-backend
-docker build -t ntu-fyp-chatbot_python-server ./NTU-FYP-Chatbot-AI
-
-docker stack deploy -c docker-compose.yml ntu-fyp-chatbot
+Error response from daemon: could not choose an IP address to advertise since this system has multiple addresses on different interfaces (10.255.255.254 on lo and 172.19.97.46 on eth0) - specify one with --advertise-addr
 ```
 
-### Check the services (optional)
+You can specify the IP address to use by running:
+
+```bash
+# Get the IP address of eth0 interface
+# and run docker swarm init with the extracted IP address
+IP=$(ip addr show eth0 | grep -oP 'inet \K[\d.]+')
+docker swarm init --advertise-addr $IP
+```
+
+or just manually specify the IP address that you want to use,
+
+```bash
+# <ip-address> = 172.19.97.46 in above example
+docker swarm init --advertise-addr <ip-address>
+```
+
+#### Deploy the stack
+
+Build the images by running the following command:
+
+**Note:** This takes forever to build, so be patient and just do some other things while waiting (do not let it go to sleep, cause it won't continue processing when sleeping).
+
+**Another Note:** This would also take up a lot of space, so make sure you have enough space to build the images.
+
+**Yet Another Note:** The database or whatever files / folders will be stored in a docker volume, so whatever information you have in those files / folders would also be stored in the docker volume. So if you want to keep the data private, DELETE THEM BEFORE BUILDING THE IMAGES.
+
+**Ok Final Note I Promise:** If you do not have `buildx` enabled, then you can build the images separately by just omiting the `buildx` keyword.
+
+```bash
+docker buildx build -t ntu-fyp-chatbot_node-server ./NTU-FYP-Chatbot-backend
+docker buildx build -t ntu-fyp-chatbot_python-server ./NTU-FYP-Chatbot-AI
+```
+
+Then deploy the stack by running the following command:
+
+With GPU:
+
+```bash
+docker stack deploy -c docker-compose-gpu.yml ntu-fyp-chatbot
+```
+
+Without GPU:
+
+```bash
+docker stack deploy -c docker-compose-cpu.yml ntu-fyp-chatbot
+```
+
+#### Check the services (optional)
 
 There should be 2 services running: `node-server` and `python-server` (whatever their names are but they should be similar)
 
@@ -91,20 +267,33 @@ There should be 2 services running: `node-server` and `python-server` (whatever 
 docker stack ps ntu-fyp-chatbot
 ```
 
-### See the logs (optional)
+#### See the logs (optional)
 
 ```bash
 docker service logs ntu-fyp-chatbot_node-server
 docker service logs ntu-fyp-chatbot_python-server
 ```
 
-### Access the services
+For real time
+
+```bash
+docker service logs -f ntu-fyp-chatbot_node-server
+docker service logs -f ntu-fyp-chatbot_python-server
+```
+
+#### Access the services
+
+```bash
+IP=$(ip addr show eth0 | grep -oP 'inet \K[\d.]+')
+echo "Node Server: https://$IP:3000"
+echo "Python Server: https://$IP:3001"
+```
 
 The services should be accessible at `https://localhost:3000` (node server) and `https://localhost:3001` (python server which you don't really need to access) respectively.
 
 The ports are set at `3000` and `3001` by default. If you messed with the building process, then you should know where they are.
 
-### Remove the stack
+#### Remove the stack
 
 When you're done, you can remove the stack with the following command:
 
@@ -112,19 +301,25 @@ When you're done, you can remove the stack with the following command:
 docker stack rm ntu-fyp-chatbot
 ```
 
-### Extra Information
+## Extra Information
 
-#### Environment Variables
+### GPU Support on Docker
+
+- If not working then idk man, it took me way too long on this already. I'm not gonna help you with this. bye .\_.
+
+### Environment Variables
 
 - The environment variables are set in the `docker-compose.yml` file. You can change them there if you need to. But I won't guarantee that it will work.
 
-#### Node Server
+- These includes the ports, volumes, and other stuff that you might want to change.
+
+### Node Server
 
 - The node server database is stored in a volume at `/app/database`, which includes `database.db` and other related folders. It is initialised on the first run of the node server. All subsequent runs will use the same database _I hope_.
 
 - The frontend build is stored in a volume at `/app/fe-dist`, which includes the compiled frontend code. So make sure that the frontend built code folder exists before building the docker image.
 
-#### Python Server
+### Python Server
 
 - The python server uses a `requirements.txt` file in its repository to install the necessary packages. If you need to add more packages, please add them to the `requirements.txt` file.
 
@@ -153,4 +348,3 @@ I would like to thank the following:
 3. [Github Copilot](https://copilot.github.com/) for sort of helping me during this project.
 4. [Sheer Willpower](https://www.youtube.com/watch?v=ZXsQAXx_ao0) for keeping me alive during this project, knowing that what I'm doing is probably not worth it.
 5. The Universe for giving me the opportunity to do this project, which I probably won't do again, but hey, at least I did it once, right? (not like it's what i wanted in the first place, and might even be irrelevant in the future, but hey, at least I did something right? for the sake of whomever it may concern, if it even concerns anyone at all, which it probably doesn't, but hey, at least I tried)
-6. Definitely not my supervising professor, for forgetting that I exist, not providing assistance, providing terrible advice, and not even knowing what I'm doing. But, at least this will get me out of this hellscape faster right?
