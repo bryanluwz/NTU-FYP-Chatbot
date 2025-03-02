@@ -298,7 +298,7 @@ echo "Node Server: https://$IP:3000"
 echo "Python Server: https://$IP:3001"
 ```
 
-The services should be accessible at `https://localhost:3000` (node server) and `https://localhost:3001` (python server which you don't really need to access) respectively.
+The services should **not** be accessible at `https://localhost:3000` (node server) and `https://localhost:3001` (python server which you don't really need to access) respectively.
 
 The ports are set at `3000` and `3001` by default. If you messed with the building process, then you should know where they are.
 
@@ -342,7 +342,7 @@ docker stack rm ntu-fyp-chatbot
 
 2. Why only slow the first time running?
 
-   - Because I'm slow to initialise, and I only initialise each sub components when needed ok? 🐢
+   - Bro I have no idea you gotta ask the AI overlords.
 
 3. Docker not found, Daemon not running, etc.
 

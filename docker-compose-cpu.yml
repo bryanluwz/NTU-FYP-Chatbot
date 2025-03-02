@@ -28,10 +28,18 @@ services:
       - "3001:3001"
     environment:
       - HF_TOKEN_FILE=/run/secrets/hf_token
+      - TOGETHER_API_KEY_FILE=/run/secrets/together_api_key
+      - AZURE_API_ENDPOINT_FILE=/run/secrets/azure_api_endpoint
+      - AZURE_API_KEY_FILE=/run/secrets/azure_api_key
+      - GOOGLE_CLOUD_API_KEY_FILE=/run/secrets/google_cloud_api_key
       - LLM_MODEL=meta-llama/Llama-3.2-1B-Instruct # ✅ Set the model to use here
       - DEBUG=true # ✅ Enable debug mode for python server (why not working lol)
     secrets:
       - hf_token
+      - together_api_key
+      - azure_api_endpoint
+      - azure_api_key
+      - google_cloud_api_key
     volumes:
       - ./python-certs:/app/certs
       - ./NTU-FYP-Chatbot-AI/documents:/app/documents
@@ -45,6 +53,14 @@ secrets:
     file: ./secrets/hf_token.txt
   jwt_secret:
     file: ./secrets/jwt_secret.txt
+  together_api_key:
+    file: ./secrets/together_api_key.txt
+  azure_api_endpoint:
+    file: ./secrets/azure_api_endpoint.txt
+  azure_api_key:
+    file: ./secrets/azure_api_key.txt
+  google_cloud_api_key:
+    file: ./secrets/google_cloud_api_key.json
 
 networks:
   chatbot-network:
