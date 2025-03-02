@@ -48,7 +48,7 @@ services:
       - ./python-certs:/app/certs
       - ./NTU-FYP-Chatbot-AI/documents:/app/documents
       - ./NTU-FYP-Chatbot-AI/models:/app/models
-    command: ["python3", "app.py", "--debug"]
+    command: ["python3", "app.py", "--debug", "--api-mode"]
     deploy:
       replicas: 1
       resources:

@@ -78,10 +78,16 @@ _Recommended if you don't have `node` and `python`_
 
 **NOTE: You can use `Docker Desktop` or `docker on WSL2` to run the project. Most of the procedures are similar, but there are some differences in the GPU support section. Do not change `docker` styles throuhg setup process**
 
-Similar to using `node` and `python`, you can run the project using Docker. But you would have to create a folder called `secrets` with two `txt` files,
+Similar to using `node` and `python`, you can run the project using Docker. But you would have to create a folder called `secrets` with a bunch `txt` and `json` files,
+
+For more information on the following secrets, please refer to the respective README.md in the submodules. The first one is under the `NTU-FYP-Chatbot-backend` repository, and the second one is under the `NTU-FYP-Chatbot-AI` repository.
 
 1. `jwt_secret.txt` - containing the JWT secret
-2. `hf_token.txt` - containing the huggingface token
+2. `hf_token.txt` - containing the huggingface token (if running models locally)
+3. `together_api_key.txt` - containing the Together API key (if running models with `api-mode`)
+4. `azure_api_endpoint.txt` - containing the Azure API endpoint (if running models with `api-mode`)
+5. `azure_api_key.txt` - containing the Azure API key (if running models with `api-mode`)
+6. `google_cloud_api_key,json` - containing the Google Cloud Service Account JSON credentials thingy (if running models with `api-mode`)
 
 The `secrets` folder should be in the root directory of the project, as follows:
 
@@ -93,7 +99,8 @@ NTU-FYP-Chatbot
 ├── docker-compose.yml
 ├── secrets
 │   ├── jwt_secret.txt
-│   └── hf_token.txt
+│   ├── ...
+│   └── together_api_key.txt
 │   ...
 └── README.md
 ```
@@ -238,7 +245,7 @@ docker swarm init --advertise-addr <ip-address>
 
 Build the images by running the following command:
 
-**Note:** This takes forever to build, so be patient and just do some other things while waiting (do not let it go to sleep, cause it won't continue processing when sleeping).
+**Note:** This takes forever to build, so be patient and just do some other things while waiting (do not let it go to sleep, cause it won't continue processing when sleeping). REMEMBER TO DELETE `node_modules` and `venv` folders before building the images. (learn it the hard way :/)
 
 **Another Note:** This would also take up a lot of space, so make sure you have enough space to build the images.
 
@@ -254,6 +261,11 @@ docker buildx build -t ntu-fyp-chatbot_python-server ./NTU-FYP-Chatbot-AI
 ```
 
 Then deploy the stack by running the following command:
+
+_Important_ - If you would like to run the `python` server differently with `debug` mode or `api-mode` mode, you can change the command in the `docker-compose.yml` file. For example, to run the `python` server in `debug` and `api-mode` mode, you can change the command to:
+`command: ["python3", "app.py", "--debug", "--api-mode"]`
+
+Do note that the `python` server is run in `debug` mode and `api-mode` mode by default.
 
 With GPU:
 
