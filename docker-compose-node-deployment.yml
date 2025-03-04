@@ -9,7 +9,6 @@ services:
       - AI_HOST=python-server
       - AI_PORT=3001
       - JWT_SECRET_FILE=/run/secrets/jwt_secret
-      - PYTHON_SERVER_ENDPOINT_FILE=/run/secrets/python_server_endpoint
     secrets:
       - jwt_secret
       - python_server_endpoint
@@ -24,9 +23,8 @@ services:
 networks:
   chatbot-network:
     driver: bridge # Use a bridge network for standalone Node server
+    attachable: true
 
 secrets:
   jwt_secret:
     file: ./secrets/jwt_secret.txt
-  python_server_endpoint:
-    file: ./secrets/python_server_google_cloud_endpoint.txt

@@ -258,6 +258,7 @@ Build the images by running the following command:
 ```bash
 docker buildx build -t ntu-fyp-chatbot_node-server ./NTU-FYP-Chatbot-backend
 docker buildx build -t ntu-fyp-chatbot_python-server ./NTU-FYP-Chatbot-AI
+docker buildx build -t ntu-fyp-chatbot_python-server_smol ./NTU-FYP-Chatbot-AI
 ```
 
 Then deploy the stack by running the following command:

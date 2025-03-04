@@ -25,6 +25,7 @@ services:
 networks:
   chatbot-network:
     driver: bridge # Use a bridge network for standalone Python server
+    attachable: true
 
 secrets:
   rag_tokens:
