@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  node-server:
+    image: ntu-fyp-chatbot_node-server
+    ports:
+      - "3000:3000"
+    environment:
+      - AI_HOST=python-server
+      - AI_PORT=3001
+      - JWT_SECRET_FILE=/run/secrets/jwt_secret
+      - PYTHON_SERVER_ENDPOINT_FILE=/run/secrets/python_server_endpoint
+    secrets:
+      - jwt_secret
+      - python_server_endpoint
+    volumes:
+      - ./NTU-FYP-Chatbot-frontend/dist:/app/fe-dist
+      - ./node-certs:/app/certs
+      - ./NTU-FYP-Chatbot-backend/database:/app/database
+    command: ["node", "dist/server.js"]
+    networks:
+      - chatbot-network
+
+networks:
+  chatbot-network:
+    driver: bridge # Use a bridge network for standalone Node server
+
+secrets:
+  jwt_secret:
+    file: ./secrets/jwt_secret.txt
+  python_server_endpoint:
+    file: ./secrets/python_server_google_cloud_endpoint.txt

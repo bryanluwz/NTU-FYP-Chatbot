@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  python-server:
+    image: ntu-fyp-chatbot_python-server_smol
+    ports:
+      - "3001:3001"
+    environment:
+      - RAG_TOKENS_FILE=/run/secrets/rag_tokens
+      - AZURE_API_FILE=/run/secrets/azure_api
+      - GOOGLE_CLOUD_API_KEY_FILE=/run/secrets/google_cloud_api_key
+      - LLM_MODEL=meta-llama/Llama-3.2-1B-Instruct
+    secrets:
+      - rag_tokens
+      - azure_api
+      - google_cloud_api_key
+    volumes:
+      - ./python-certs:/app/certs
+      - ./NTU-FYP-Chatbot-AI/documents:/app/documents
+      - ./NTU-FYP-Chatbot-AI/models:/app/models
+    command: ["python3", "app.py", "--debug", "--api-mode"]
+    networks:
+      - chatbot-network
+
+networks:
+  chatbot-network:
+    driver: bridge # Use a bridge network for standalone Python server
+
+secrets:
+  rag_tokens:
+    file: ./secrets/rag_tokens.txt
+  azure_api:
+    file: ./secrets/azure_api.txt
+  google_cloud_api_key:
+    file: ./secrets/google_cloud_api_key.json
