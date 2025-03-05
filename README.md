@@ -8,33 +8,39 @@ Please see each submodules README.md for more information, or not up to you...
 2. [Python Server](./NTU-FYP-Chatbot-AI/README.md)
 3. [Frontend](./NTU-FYP-Chatbot-frontend/README.md)
 
+There are three ways to run the project:
+
+- [Running the Project with `node` and `python`](#running-the-project-with-node-and-python)
+- [Running the Project with `Docker swarm` (with or without GPU)](#running-the-project-with-docker-swarm-with-or-without-gpu)
+- [Running the Project with `Docker` and nothing else](#running-the-project-with-docker-and-nothing-else)
+
 ## Table of Contents
 
-- [NTU-FYP-Chatbot](#ntu-fyp-chatbot)
-  - [Table of Contents](#table-of-contents)
-  - [Download and Installation](#download-and-installation)
-    - [Clone the repository (including submodules)](#clone-the-repository-including-submodules)
-    - [Pull the latest changes](#pull-the-latest-changes)
-  - [Running the Project with `node` and `python`](#running-the-project-with-node-and-python)
-  - [Running the Project with `Docker`](#running-the-project-with-docker)
-    - [For GPU Support](#for-gpu-support)
-      - [Docker Desktop (Windows)](#docker-desktop-windows)
-      - [WSL2 / Linux](#wsl2--linux)
-    - [Building and Running the Docker Containers](#building-and-running-the-docker-containers)
-      - [Init swarm](#init-swarm)
-      - [Deploy the stack](#deploy-the-stack)
-      - [Check the services (optional)](#check-the-services-optional)
-      - [See the logs (optional)](#see-the-logs-optional)
-      - [Access the services](#access-the-services)
-      - [Remove the stack](#remove-the-stack)
-  - [Extra Information](#extra-information)
-    - [GPU Support on Docker](#gpu-support-on-docker)
-    - [Environment Variables](#environment-variables)
-    - [Node Server](#node-server)
-    - [Python Server](#python-server)
-  - [FAQs](#faqs)
-  - [License](#license)
-  - [Acknowledgements](#acknowledgements)
+- [Download and Installation](#download-and-installation)
+  - [Clone the repository (including submodules)](#clone-the-repository-including-submodules)
+  - [Pull the latest changes](#pull-the-latest-changes)
+- [Running the Project with `node` and `python`](#running-the-project-with-node-and-python)
+- [Running the Project with Docker swarm (with or without GPU)](#running-the-project-with-docker-swarm-with-or-without-gpu)
+  - [For GPU Support](#for-gpu-support)
+    - [Docker Desktop (Windows)](#docker-desktop-windows)
+    - [WSL2 / Linux](#wsl2--linux)
+  - [Building and Running the Docker Containers](#building-and-running-the-docker-containers)
+    - [Ensuring buildx is enabled](#ensuring-buildx-is-enabled)
+    - [Init swarm](#init-swarm)
+    - [Deploy the stack](#deploy-the-stack)
+    - [Check the services (optional)](#check-the-services-optional)
+    - [See the logs (optional)](#see-the-logs-optional)
+    - [Access the services](#access-the-services)
+    - [Remove the stack](#remove-the-stack)
+- [Running the Project with Docker and nothing else](#running-the-project-with-docker-and-nothing-else)
+- [Extra Information](#extra-information)
+  - [GPU Support on Docker](#gpu-support-on-docker)
+  - [Environment Variables](#environment-variables)
+  - [Node Server](#node-server)
+  - [Python Server](#python-server)
+- [FAQs](#faqs)
+- [License](#license)
+- [Acknowledgements](#acknowledgements)
 
 ## Download and Installation
 
@@ -72,7 +78,7 @@ Please refer to the README.md in the respective folders for more information. Yo
 
 2. [Python Server](./NTU-FYP-Chatbot-AI/README.md#setup-and-installation)
 
-## Running the Project with `Docker`
+## Running the Project with `Docker swarm` (with or without GPU)
 
 _Recommended if you don't have `node` and `python`_
 
@@ -322,6 +328,31 @@ When you're done, you can remove the stack with the following command:
 docker stack rm ntu-fyp-chatbot
 ```
 
+## Running the Project with `Docker` and nothing else
+
+Pull images from Docker Hub:
+
+```bash
+docker pull bryanluwz/ntu-fyp-chatbot_node-server
+docker pull bryanluwz/ntu-fyp-chatbot_python-server_smol
+```
+
+Then run the following command:
+
+(-d) for detached mode
+
+```bash
+docker compose -f docker-compose-node-deployment.yml -f docker-compose-python-deployment-smol.yml up -d
+```
+
+Then you can access the services at `https://localhost:3000` or whereever is is running respectively.
+
+To stop the services, you can run:
+
+```bash
+docker compose -f docker-compose-node-deployment.yml -f docker-compose-python-deployment-smol.yml down
+```
+
 ## Extra Information
 
 ### GPU Support on Docker
@@ -374,3 +405,7 @@ I would like to thank the following:
 3. [Github Copilot](https://copilot.github.com/) for sort of helping me during this project.
 4. [Sheer Willpower](https://www.youtube.com/watch?v=ZXsQAXx_ao0) for keeping me alive during this project, knowing that what I'm doing is probably not worth it.
 5. The Universe for giving me the opportunity to do this project, which I probably won't do again, but hey, at least I did it once, right? (not like it's what i wanted in the first place, and might even be irrelevant in the future, but hey, at least I did something right? for the sake of whomever it may concern, if it even concerns anyone at all, which it probably doesn't, but hey, at least I tried)
+
+```
+
+```

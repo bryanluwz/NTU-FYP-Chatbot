@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   node-server:
-    image: ntu-fyp-chatbot_node-server
+    image: bryanluwz/ntu-fyp-chatbot_node-server
     ports:
       - "3000:3000"
     environment:

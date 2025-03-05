@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   python-server:
-    image: ntu-fyp-chatbot_python-server_smol
+    image: bryanluwz/ntu-fyp-chatbot_python-server_smol
     ports:
       - "3001:3001"
     environment:
