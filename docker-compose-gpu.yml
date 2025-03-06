@@ -6,7 +6,7 @@ networks:
 
 services:
   node-server:
-    image: ntu-fyp-chatbot_node-server
+    image: braynluwz/ntu-fyp-chatbot_node-server
     ports:
       - "3000:3000"
     environment:
@@ -26,7 +26,7 @@ services:
       - chatbot-network # Attach to overlay network
 
   python-server:
-    image: ntu-fyp-chatbot_python-server
+    image: bryanluwz/ntu-fyp-chatbot_python-server
     # Remove this deploy section if you are not using GPU (or GPU not found)
     ports:
       - "3001:3001"
@@ -45,7 +45,7 @@ services:
       - ./python-certs:/app/certs
       - ./NTU-FYP-Chatbot-AI/documents:/app/documents
       - ./NTU-FYP-Chatbot-AI/models:/app/models
-    command: ["python3", "app.py", "--debug", "--api-mode"]
+    command: ["python3", "app.py", "--debug", "--api-mode"] # Remove --api-mode if you are not using the API
     deploy:
       replicas: 1
       resources:

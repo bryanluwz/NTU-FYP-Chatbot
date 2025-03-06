@@ -11,8 +11,10 @@ Please see each submodules README.md for more information, or not up to you...
 There are three ways to run the project:
 
 - [Running the Project with `node` and `python`](#running-the-project-with-node-and-python)
-- [Running the Project with `Docker swarm` (with or without GPU)](#running-the-project-with-docker-swarm-with-or-without-gpu)
-- [Running the Project with `Docker` and nothing else](#running-the-project-with-docker-and-nothing-else)
+- [Running the Project with Docker swarm (with or without GPU)](#running-with-docker-swarm-with-or-without-gpu)
+- [Running the Project with Docker and nothing else](#running-the-project-with-docker-and-nothing-else)
+
+If you don't want to run, then check out the deployed service I did for my FYP, though with some restricted features: [Here](http://ec2-54-169-177-146.ap-southeast-1.compute.amazonaws.com/)
 
 ## Table of Contents
 
@@ -20,25 +22,18 @@ There are three ways to run the project:
   - [Clone the repository (including submodules)](#clone-the-repository-including-submodules)
   - [Pull the latest changes](#pull-the-latest-changes)
 - [Running the Project with `node` and `python`](#running-the-project-with-node-and-python)
-- [Running the Project with Docker swarm (with or without GPU)](#running-the-project-with-docker-swarm-with-or-without-gpu)
-  - [For GPU Support](#for-gpu-support)
-    - [Docker Desktop (Windows)](#docker-desktop-windows)
-    - [WSL2 / Linux](#wsl2--linux)
-  - [Building and Running the Docker Containers](#building-and-running-the-docker-containers)
-    - [Ensuring buildx is enabled](#ensuring-buildx-is-enabled)
-    - [Init swarm](#init-swarm)
-    - [Deploy the stack](#deploy-the-stack)
-    - [Check the services (optional)](#check-the-services-optional)
+- [Running with `Docker`](#running-with-docker)
+  - [Docker Images from Docker Hub](#docker-images-from-docker-hub)
+  - [Building your own images](#building-your-own-images)
+  - [Prerequisites](#prerequisites)
+  - [Running with Docker swarm (with or without GPU)](#running-with-docker-swarm-with-or-without-gpu)
+    - [Initialise swarm](#initialise-swarm)
+    - [Deploying stack](#deploying-stack)
     - [See the logs (optional)](#see-the-logs-optional)
     - [Access the services](#access-the-services)
     - [Remove the stack](#remove-the-stack)
-- [Running the Project with Docker and nothing else](#running-the-project-with-docker-and-nothing-else)
-- [Extra Information](#extra-information)
-  - [GPU Support on Docker](#gpu-support-on-docker)
-  - [Environment Variables](#environment-variables)
-  - [Node Server](#node-server)
-  - [Python Server](#python-server)
-- [FAQs](#faqs)
+    - [Leave the swarm (optional, but recommended)](#leave-the-swarm-optional-but-recommended)
+  - [Running the Project with `Docker` and nothing else](#running-the-project-with-docker-and-nothing-else)
 - [License](#license)
 - [Acknowledgements](#acknowledgements)
 
@@ -78,22 +73,25 @@ Please refer to the README.md in the respective folders for more information. Yo
 
 2. [Python Server](./NTU-FYP-Chatbot-AI/README.md#setup-and-installation)
 
-## Running the Project with `Docker swarm` (with or without GPU)
+## Running with `Docker`
 
 _Recommended if you don't have `node` and `python`_
 
 **NOTE: You can use `Docker Desktop` or `docker on WSL2` to run the project. Most of the procedures are similar, but there are some differences in the GPU support section. Do not change `docker` styles throuhg setup process**
 
-Similar to using `node` and `python`, you can run the project using Docker. But you would have to create a folder called `secrets` with a bunch `txt` and `json` files,
-
-For more information on the following secrets, please refer to the respective README.md in the submodules. The first one is under the `NTU-FYP-Chatbot-backend` repository, and the second one is under the `NTU-FYP-Chatbot-AI` repository.
+Similar to using `node` and `python`, you can run the project using Docker. But you would have to create a folder called `secrets` with a bunch `txt` and `json` files.
 
 1. `jwt_secret.txt` - containing the JWT secret
-2. `hf_token.txt` - containing the huggingface token (if running models locally)
-3. `together_api_key.txt` - containing the Together API key (if running models with `api-mode`)
-4. `azure_api_endpoint.txt` - containing the Azure API endpoint (if running models with `api-mode`)
-5. `azure_api_key.txt` - containing the Azure API key (if running models with `api-mode`)
-6. `google_cloud_api_key,json` - containing the Google Cloud Service Account JSON credentials thingy (if running models with `api-mode`)
+2. `rag_tokens.txt` - containing the huggingface token (for LLM local) + Together API key (for LLM API)
+3. `azure_api.txt` - containing the Azure Vison API endpoint + key + Azure OpenAI API endpoint + key
+4. `google_cloud_api_key.json` - containing the Google Cloud Service Account JSON credentials thingy (if running models with `api-mode`)
+
+For files that contain more than one secret, you can separate them with a new line. For example, the `rag_tokens.txt` file should look like this:
+
+```txt
+huggingface_token
+together_api_key
+```
 
 The `secrets` folder should be in the root directory of the project, as follows:
 
@@ -102,122 +100,36 @@ NTU-FYP-Chatbot
 ├── NTU-FYP-Chatbot-AI
 ├── NTU-FYP-Chatbot-backend
 ├── NTU-FYP-Chatbot-frontend
-├── docker-compose.yml
 ├── secrets
 │   ├── jwt_secret.txt
 │   ├── ...
-│   └── together_api_key.txt
+│   └── rag_tokens.txt
 │   ...
 └── README.md
 ```
 
-You do not have to do anything else with the other stuff, just make sure you have the `secrets` folder with the two `.txt` files.
+### Docker Images from Docker Hub
 
-### For GPU Support
+There are four images available on Docker Hub:
 
-Of course you gotta have a GPU to run this, and you need to have the necessary drivers installed. You can check if you have the necessary drivers by running `nvidia-smi` in the terminal. If you see the GPU information, then you are good to go. If not, then you need to install the necessary drivers. How? I don't know, google it.
+1. [Node server](https://hub.docker.com/repository/docker/bryanluwz/ntu-fyp-chatbot_node-server), for the backend server.
+2. [Python server (smol)](https://hub.docker.com/repository/docker/bryanluwz/ntu-fyp-chatbot_python-server_smol), this uses API services instead of running models, such as LLMs, BLIPs, embeddings, etc., locally, for potato computers.
+3. [Python server (API services)](https://hub.docker.com/repository/docker/bryanluwz/ntu-fyp-chatbot_python-server), this uses the API services instead of running models, such as LLMs and BLIPs, locally.
+4. [Python server (local models)](https://hub.docker.com/repository/docker/bryanluwz/ntu-fyp-chatbot_python-server_local), this uses the local models, such as LLMs and BLIPs, instead of the API services.
 
-#### Docker Desktop (Windows)
+Before running any `docker compose` commands, make sure that the `docker-compose-whatever.yml` files are using the right images for your use case.
 
-When you download Docker Desktop, WSL2 is automatically installed (or maybe need specified idk). You can check if you have WSL2 by running `wsl -l -v`. If you see `docker-desktop-data` and `docker-desktop` in the list, then you have WSL2 installed. See [WSL2 / Linux](#wsl2--linux) for further instructions.
+### Building your own images
 
-If WSL2 is not installed, then you can follow the following instructions:
+If you don't want to use the images that I have built, and want to build your own images, see [Docker-build.md](./Docker-build.md) for more information.
 
-1. [yes](https://www.google.com/search?q=how+to+install+wsl+with+docker&oq=how+to+install+wsl+with+docker)
+### Prerequisites
 
-#### WSL2 / Linux
+See [Docker-prerequisites.md](./Docker-prerequisites.md) for more information.
 
-_If you are on any Linux distribution, you can follow this guide. Might as well not use the `Docker Desktop` method right?_
+### Running with Docker swarm (with or without GPU)
 
-Make sure that the docker running is not the Docker Desktop, but the Docker running in WSL2. You can check this by running `docker info` and checking the `Operating System` field. If it is `Docker Desktop`, then you are running the Docker Desktop version, and you should switch to the WSL2 version. You must terminate the `Docker Desktop` app before running the WSL2 terminal.
-
-Alternatively, you can run the following command to switch to the WSL2 version:
-
-```bash
-docker context ls
-docker context use default
-```
-
-Then in the WSL / Linux terminal, you can run the following:
-
-1. Check if you have `docker compose` installed by running `docker-compose --version`. If not, install it by:
-
-   ```bash
-   DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
-   mkdir -p $DOCKER_CONFIG/cli-plugins
-   curl -SL https://github.com/docker/compose/releases/download/v2.12.2/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
-
-   chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
-   # Test the installation
-   docker compose version
-   ```
-
-2. Install NVIDIA Container Toolkit (if not installed yet) by:
-
-   ```bash
-   distribution=$(. /etc/os-release;echo $ID$VERSION_ID) && \
-   curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add - && \
-   curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list && \
-   sudo apt update && sudo apt install -y nvidia-container-toolkit
-   ```
-
-3. Restart Docker by:
-
-   ```bash
-   sudo systemctl restart docker
-   ```
-
-   or just restart the ~~computer~~ WSL terminal, by running `wsl --shutdown` in a non-WSL terminal in Windows, make sure right docker context.
-
-4. Check if the NVIDIA Container Toolkit is installed by running
-
-   ```bash
-   docker run --rm --gpus all nvidia/cuda:12.3.1-base-ubuntu20.04 nvidia-smi
-   ```
-
-5. Test further using the `docker-compose-test.yml` file:
-
-   This might take some time to download
-
-   ```bash
-   docker compose -f docker-compose-test.yml up
-   ```
-
-   This should print GPU device name.
-
-6. Remove all containers and images by running: (optional, as this will remove everything that was installed)
-
-   ```bash
-   docker compose -f docker-compose-test.yml down
-   docker system prune -a
-   docker rmi $(docker images -q -a)
-   ```
-
-7. If everything is working, you need to setup GPU for docker configuration by running:
-
-   ```bash
-   sudo ./gpu-setup.sh
-   ```
-
-### Building and Running the Docker Containers
-
-Note that you have to use the same docker context as the one you used to test the GPU support. If you are using WSL2, then you should be using the WSL2 context. If you are using Docker Desktop terminal (meaning NO GPU), then you should be using the Docker Desktop context.
-
-#### Ensuring `buildx` is enabled
-
-You can check if `buildx` is enabled by running the following command:
-
-```bash
-docker buildx version
-```
-
-If it is not enabled, you can enable it by running the following command:
-
-```bash
-docker plugin install docker/docker-buildx
-```
-
-#### Init swarm
+#### Initialise swarm
 
 ```bash
 docker swarm init
@@ -247,24 +159,7 @@ or just manually specify the IP address that you want to use,
 docker swarm init --advertise-addr <ip-address>
 ```
 
-#### Deploy the stack
-
-Build the images by running the following command:
-
-**Note:** This takes forever to build, so be patient and just do some other things while waiting (do not let it go to sleep, cause it won't continue processing when sleeping). REMEMBER TO DELETE `node_modules` and `venv` folders before building the images. (learn it the hard way :/)
-
-**Another Note:** This would also take up a lot of space, so make sure you have enough space to build the images.
-
-**Yet Another Note:** The database or whatever files / folders will be stored in a docker volume, so whatever information you have in those files / folders might also (actually idk, i might fix that alr) be stored in the docker volume. So if you want to keep the data private, DELETE THEM BEFORE BUILDING THE IMAGES.
-
-**Ok Final Note I Promise:** If you do not have `buildx` enabled, then you can build the images separately by just omiting the `buildx` keyword.
-
-**Ok I lied, one more note:** You will be running a few shell files on WSL2/Linux, but I'm not sure whether they're necessary or not, because those are the vestigial remains of my attempts to get the GPU support working. _Wish me good health_
-
-```bash
-docker buildx build -t ntu-fyp-chatbot_node-server ./NTU-FYP-Chatbot-backend
-docker buildx build -t ntu-fyp-chatbot_python-server ./NTU-FYP-Chatbot-AI
-```
+#### Deploying stack
 
 Then deploy the stack by running the following command:
 
@@ -286,14 +181,6 @@ Without GPU:
 docker stack deploy -c docker-compose-cpu.yml ntu-fyp-chatbot
 ```
 
-#### Check the services (optional)
-
-There should be 2 services running: `node-server` and `python-server` (whatever their names are but they should be similar)
-
-```bash
-docker stack ps ntu-fyp-chatbot
-```
-
 #### See the logs (optional)
 
 ```bash
@@ -310,15 +197,9 @@ docker service logs -f ntu-fyp-chatbot_python-server
 
 #### Access the services
 
-```bash
-IP=$(ip addr show eth0 | grep -oP 'inet \K[\d.]+')
-echo "Node Server: https://$IP:3000"
-echo "Python Server: https://$IP:3001"
-```
+The services should be accessible at whatever your IP address is + the ports. For example, if your IP address is `1.2.3.4`, then you can access the services at `http://1.2.3.4:3000` and `http://1.2.3.4:3001`.
 
-The services should **not** be accessible at `https://localhost:3000` (node server) and `https://localhost:3001` (python server which you don't really need to access) respectively.
-
-The ports are set at `3000` and `3001` by default. If you messed with the building process, then you should know where they are.
+The ports are set at `3000` and `3001` by default. If you messed with the port number during the building process, then you should know where they are.
 
 #### Remove the stack
 
@@ -328,7 +209,19 @@ When you're done, you can remove the stack with the following command:
 docker stack rm ntu-fyp-chatbot
 ```
 
-## Running the Project with `Docker` and nothing else
+#### Leave the swarm (optional, but recommended)
+
+When you're done with everything, you can leave the swarm by running the following command:
+
+```bash
+docker swarm leave --force
+```
+
+If you don't leave the swarm, then you do not have to init the swarm again when you want to deploy the stack again. But if you leave the swarm, then you have to init the swarm again before deploying the stack.
+
+### Running the Project with `Docker` and nothing else
+
+Again, change the image name to whichever image you want to use in the following `docker-compose` commands. I'm using the `smol` version of the python server for this example.
 
 Pull images from Docker Hub:
 
@@ -355,16 +248,6 @@ docker compose -f docker-compose-node-deployment.yml -f docker-compose-python-de
 
 ## Extra Information
 
-### GPU Support on Docker
-
-- If not working then idk man, it took me way too long on this already. I'm not gonna help you with this. bye .\_.
-
-### Environment Variables
-
-- The environment variables are set in the `docker-compose.yml` file. You can change them there if you need to. But I won't guarantee that it will work.
-
-- These includes the ports, volumes, and other stuff that you might want to change.
-
 ### Node Server
 
 - The node server database is stored in a volume at `/app/database`, which includes `database.db` and other related folders. It is initialised on the first run of the node server. All subsequent runs will use the same database _I hope_.
@@ -376,21 +259,6 @@ docker compose -f docker-compose-node-deployment.yml -f docker-compose-python-de
 - The python server uses a `requirements.txt` file in its repository to install the necessary packages. If you need to add more packages, please add them to the `requirements.txt` file.
 
 - The python server uses a `model` volume in its repository to store the model files, which includes LLMs, BLIPs, embeddings, etc. This folder is initialised on the first run of the python server. All subsequent runs will use the same model files _I hope_. Similarly, a `documents` volume and `temp_storage` folder (_not volume ah_) is used to store the documents and temporary files respectively.
-
-## FAQs
-
-1. Why so slow?
-
-   - Because I'm slow. 🐢
-
-2. Why only slow the first time running?
-
-   - Bro I have no idea you gotta ask the AI overlords.
-
-3. Docker not found, Daemon not running, etc.
-
-   - Did you run Docker Desktop before shutting it down? No? Good, then you're good to go.
-     Yes? Then run `wsl --shutdown` in a non-WSL terminal in Windows.
 
 ## License
 
@@ -405,7 +273,3 @@ I would like to thank the following:
 3. [Github Copilot](https://copilot.github.com/) for sort of helping me during this project.
 4. [Sheer Willpower](https://www.youtube.com/watch?v=ZXsQAXx_ao0) for keeping me alive during this project, knowing that what I'm doing is probably not worth it.
 5. The Universe for giving me the opportunity to do this project, which I probably won't do again, but hey, at least I did it once, right? (not like it's what i wanted in the first place, and might even be irrelevant in the future, but hey, at least I did something right? for the sake of whomever it may concern, if it even concerns anyone at all, which it probably doesn't, but hey, at least I tried)
-
-```
-
-```
