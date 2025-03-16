@@ -2,10 +2,11 @@
 
 I assume you have both `git` and `docker` already
 
-1. Pull this repo first
+1. Pull this repo first and switch to the NTU-FYP-Chatbot directory
 
    ```bash
    git clone --recurse-submodules https://github.com/bryanluwz/NTU-FYP-Chatbot
+   cd NTU-FYP-Chatbot
    ```
 
 2. Download `docker compose` if not available
