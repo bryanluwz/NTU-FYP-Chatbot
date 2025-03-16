@@ -42,7 +42,7 @@ If you don't want to run, then check out the deployed service I did for my FYP, 
 ### Clone the repository (including submodules)
 
 ```bash
-git clone --recurse-submodules <root-repo-url>
+git clone --recurse-submodules https://github.com/bryanluwz/NTU-FYP-Chatbot
 ```
 
 or if you clone already but forgot to include submodules

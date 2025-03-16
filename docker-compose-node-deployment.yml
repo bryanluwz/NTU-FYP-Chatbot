@@ -12,7 +12,6 @@ services:
       - PYTHON_SERVER_ENDPOINT_FILE=/run/secrets/python_server_endpoint
     secrets:
       - jwt_secret
-      - python_server_endpoint
     volumes:
       - ./NTU-FYP-Chatbot-frontend/dist:/app/fe-dist
       - ./node-certs:/app/certs
@@ -28,5 +27,3 @@ networks:
 secrets:
   jwt_secret:
     file: ./secrets/jwt_secret.txt
-  python_server_endpoint:
-    file: ./secrets/python_server_google_cloud_endpoint.txt

@@ -18,7 +18,7 @@ services:
       - ./python-certs:/app/certs
       - ./NTU-FYP-Chatbot-AI/documents:/app/documents
       - ./NTU-FYP-Chatbot-AI/models:/app/models
-    command: ["python3", "app.py", "--debug", "--api-mode"]
+    command: ["python3", "app.py", "--debug"]
     networks:
       - chatbot-network
 
